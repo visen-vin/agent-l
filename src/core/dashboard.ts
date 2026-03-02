@@ -68,104 +68,317 @@ export class AgentLServer {
     }
 
     private getEmbeddedHTML() {
-        const title = this.options.title || 'Agent-L | Console';
+        const title = this.options.title || 'AgentL | Intelligence Console';
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #0d1117; --glass-bg: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08); --accent: #58a6ff; --text: #c9d1d9; --text-dim: #8b949e; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text); height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0); background-size: 40px 40px; }
-        .dashboard { width: 90%; max-width: 1000px; height: 85vh; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-        .header { padding: 20px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-family: 'Outfit', sans-serif; margin: 0; font-size: 1.5rem; }
-        .header h1 span { color: var(--accent); }
-        .chat-box { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 12px 18px; border-radius: 12px; max-width: 85%; font-size: 0.95rem; line-height: 1.6; }
-        .msg.user { align-self: flex-end; background: var(--accent); color: #000; font-weight: 500; }
-        .msg.assistant { align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); }
-        .tool { font-family: 'Cascadia Code', monospace; font-size: 0.8rem; color: #ffd700; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 5px 0; }
-        .input-area { padding: 25px 30px; border-top: 1px solid var(--glass-border); display: flex; gap: 12px; }
-        input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 10px; padding: 14px 20px; color: #fff; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); }
-        button { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 0 25px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        :root {
+            --bg: #050505;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00ff88;
+            --accent-glow: rgba(0, 255, 136, 0.2);
+            --text: #ffffff;
+            --text-dim: #a1a1a1;
+            --user-msg: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Abstract Background */
+        .bg-mesh {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(0, 150, 255, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .logo { font-size: 20px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-dim);
+            transition: 0.2s;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-item.active { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+        .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+
+        /* Chat Area */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-pill {
+            display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim);
+            padding: 6px 14px; background: var(--surface); border-radius: 100px; border: 1px solid var(--border);
+        }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .msg-row { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 800px; margin: 0 auto; }
+        .msg-row.user { align-items: flex-end; }
+        .msg-row.assistant { align-items: flex-start; }
+
+        .bubble {
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 100%;
+        }
+        .msg-row.user .bubble { background: var(--surface); border: 1px solid var(--border); }
+        .msg-row.assistant .bubble { background: transparent; }
+
+        .label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+
+        /* Tool Cards */
+        .tool-call {
+            background: rgba(0, 255, 136, 0.03);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            display: flex; align-items: center; gap: 12px;
+            margin: 8px 0;
+            color: var(--accent);
+            animation: slideIn 0.3s ease-out;
+        }
+        .tool-icon { width: 14px; height: 14px; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Input Zone */
+        .input-wrap {
+            padding: 30px 40px 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .input-container {
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px;
+            display: flex; align-items: center;
+            transition: 0.3s;
+        }
+        .input-container:focus-within {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 16px 20px;
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .send-btn {
+            width: 44px; height: 44px;
+            background: var(--accent);
+            border: none; border-radius: 14px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+            margin-right: 6px;
+        }
+        .send-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .send-btn:active { transform: scale(0.95); }
+        .send-btn svg { width: 20px; height: 20px; color: black; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>Agent-L <span>Console</span></h1>
-            <div id="status" style="font-size: 0.8rem; color: var(--text-dim)">Ready</div>
-        </div>
-        <div id="chat" class="chat-box">
-             <div class="msg assistant">Welcome. System initialized. How can I help?</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="input" placeholder="Type instructions..." autofocus>
-            <button onclick="send()">Send</button>
-        </div>
+    <div class="bg-mesh"></div>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><span>AgentL</span> Intelligence</div>
+            <div class="nav-item active">
+                 💬 Intelligence Console
+            </div>
+            <div class="nav-item">
+                 🛠 Built-in Tools
+            </div>
+            <div class="nav-item">
+                 ⚙️ Settings
+            </div>
+        </aside>
+
+        <main class="chat-main">
+            <header class="chat-header">
+                <div style="font-weight: 600; color: var(--text-dim)">Autonomous Instance</div>
+                <div class="status-pill"><div class="status-dot"></div> System Active</div>
+            </header>
+
+            <div class="messages" id="chat">
+                <!-- Welcome -->
+                <div class="msg-row assistant">
+                    <div class="label">System</div>
+                    <div class="bubble">I am initialized and ready for autonomous task execution. What is the objective?</div>
+                </div>
+            </div>
+
+            <div class="input-wrap">
+                <div class="input-container">
+                    <input type="text" id="userInput" placeholder="Define objective..." autofocus autocomplete="off">
+                    <button class="send-btn" id="sendBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
+
     <script>
         const chat = document.getElementById('chat');
-        const input = document.getElementById('input');
-        const status = document.getElementById('status');
+        const input = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
         let history = [];
 
-        function add(role, text) {
-            const div = document.createElement('div');
-            div.className = 'msg ' + role;
-            div.innerText = text;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-            return div;
-        }
-
-        function log(text) {
-            const div = document.createElement('div');
-            div.className = 'tool';
-            div.innerText = '⚙️ ' + text;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        async function send() {
-            const text = input.value.trim();
-            if (!text) return;
-            add('user', text);
-            history.push({ role: 'user', content: text });
-            input.value = '';
-            status.innerText = 'Thinking...';
+        function append(role, text = '', isTool = false) {
+            const row = document.createElement('div');
+            row.className = isTool ? 'tool-call' : 'msg-row ' + role;
             
-            const assistDiv = add('assistant', '');
-            let content = '';
+            if (isTool) {
+                row.innerHTML = '⚡ <span>' + text + '</span>';
+            } else {
+                row.innerHTML = '<div class="label">' + (role === 'user' ? 'Operator' : 'Agent') + '</div><div class="bubble">' + text + '</div>';
+            }
+            
+            chat.appendChild(row);
+            chat.scrollTop = chat.scrollHeight;
+            return row.querySelector('.bubble') || row.querySelector('span');
+        }
 
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: history })
-            });
+        async function step() {
+            const query = input.value.trim();
+            if (!query) return;
 
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\\n');
-                for (const line of lines) {
-                    if (!line.startsWith('data: ')) continue;
-                    const data = JSON.parse(line.substring(6));
-                    if (data.type === 'content') { content += data.delta; assistDiv.innerText = content; }
-                    else if (data.type === 'tool_start') { log('Executing ' + data.tool); status.innerText = 'Running tool: ' + data.tool; }
-                    else if (data.type === 'done') { history.push({ role: 'assistant', content }); status.innerText = 'Ready'; }
+            input.value = '';
+            append('user', query);
+            history.push({ role: 'user', content: query });
+
+            const assistBubble = append('assistant', '');
+            let fullText = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: history })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\\n\\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            if (data.type === 'content') {
+                                fullText += data.delta;
+                                assistBubble.innerText = fullText;
+                                chat.scrollTop = chat.scrollHeight;
+                            } else if (data.type === 'tool_start') {
+                                append('assistant', 'Invoking ' + data.tool + '...', true);
+                            } else if (data.type === 'done') {
+                                history.push({ role: 'assistant', content: fullText });
+                            } else if (data.type === 'error') {
+                                append('assistant', 'Error: ' + data.message);
+                            }
+                        } catch (e) { }
+                    }
                 }
+            } catch (err) {
+                append('assistant', 'Connection failed.');
             }
         }
-        input.addEventListener('keypress', e => e.key === 'ENTER' && send());
+
+        sendBtn.onclick = step;
+        input.onkeydown = e => e.key === 'Enter' && step();
     </script>
 </body>
 </html>`;
