@@ -16,13 +16,13 @@ Agent-L is a lightweight, deterministic SDK designed to replace bloated agent fr
 ## Installation
 
 ```bash
-npm install @visen-vin/agent-l
+npm install agentl
 ```
 
 ## Quick Start
 
 ```typescript
-import { runAgent, OpenRouterProvider, ToolRegistry, ShellTool } from '@visen-vin/agent-l';
+import { runAgent, OpenRouterProvider, ToolRegistry, ShellTool } from 'agentl';
 
 const provider = new OpenRouterProvider({ apiKey: 'YOUR_API_KEY' });
 const registry = new ToolRegistry();
@@ -40,7 +40,7 @@ console.log(response.content);
 
 ### Telegram Bot
 ```typescript
-import { TelegramConnector } from '@visen-vin/agent-l';
+import { TelegramConnector } from 'agentl';
 
 const tg = new TelegramConnector(process.env.TG_TOKEN, provider, registry);
 tg.launch();
