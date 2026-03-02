@@ -7,6 +7,7 @@ export * from './providers/openrouter.js';
 export * from './tools/toolRegistry.js';
 export * from './connectors/telegram.js';
 export * from './connectors/webhook.js';
+export * from './core/dashboard.js';
 export * from './tools/localRetriever.js';
 export * from './tools/qdrantRetriever.js';
 export * from './tools/shell.js';
