@@ -1,48 +1,55 @@
-# minimal-agent-sdk
+# Agent-L 🚀🤖
 
-A minimal, deterministic, single-agent loop SDK for Node.js.
+**High-Performance, Production-Grade Agentic Engine.** 
 
-## Fast, Zero-Dependency Core
-Under 500 lines of code. No heavy frameworks. Full control.
+Agent-L is a lightweight, deterministic SDK designed to replace bloated agent frameworks (like OpenClaw). It's optimized for speed (Parallel Tools), efficiency (Tree Shaking Memory), and power (Local Shell Access).
+
+## Key Features
+
+- **⚡ Parallel Tool Execution**: Concurrently execute multiple tool calls using `Promise.all`.
+- **🌳 Tree Shaking Context**: Intelligent pruning that always keeps System Prompt + relevant memories + recent flow.
+- **🧠 Semantic Memory**: Zero-cost local embeddings or persistent Qdrant storage.
+- **🐚 Local Shell Access**: Sandboxed or direct terminal execution capabilities.
+- **🛡️ Production Grade**: Auto-retry with exponential backoff, SSE streaming, and observability hooks.
+- **🔌 Multi-Channel**: Built-in support for Telegram and Webhooks.
 
 ## Installation
+
 ```bash
-npm install minimal-agent-sdk
+npm install @visen-vin/agent-l
 ```
 
-## 20-Line Example
+## Quick Start
+
 ```typescript
-import { runAgent, OpenAIProvider, ToolRegistry } from 'minimal-agent-sdk';
+import { runAgent, OpenRouterProvider, ToolRegistry, ShellTool } from '@visen-vin/agent-l';
 
-const provider = new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY });
+const provider = new OpenRouterProvider({ apiKey: 'YOUR_API_KEY' });
 const registry = new ToolRegistry();
-
-registry.register({
-  name: 'get_weather',
-  description: 'Get weather for a city',
-  schema: { type: 'object', properties: { city: { type: 'string' } } },
-  execute: async ({ city }) => `Sunny in ${city}, 25°C`,
-});
+registry.register(ShellTool.definition);
 
 const response = await runAgent(provider, {
-  messages: [{ role: 'user', content: 'What is the weather in London?' }],
-  system: 'You are a helpful weather assistant.',
+  messages: [{ role: 'user', content: 'List files in the current directory' }],
+  onStream: (chunk) => process.stdout.write(chunk),
 }, registry);
 
 console.log(response.content);
-// Output: The weather in London is sunny and 25°C.
 ```
 
-## Features
-- ✅ Deterministic single-agent loop
-- ✅ Tool calling
-- ✅ Pluggable LLM providers (OpenAI included)
-- ✅ **Semantic Retrieval (Memory)**: Inject relevant past context based on query (Local or Qdrant).
-- ✅ **Qdrant Integration**: Connect to persistent Vector DB in Docker.
-- ✅ **Context Pruning**: "Tree Shaking" (1 + Middle + 2) strategy.
-- ✅ Zero external framework dependency
-- ✅ Fully typed
+## Advanced Usage
+
+### Telegram Bot
+```typescript
+import { TelegramConnector } from '@visen-vin/agent-l';
+
+const tg = new TelegramConnector(process.env.TG_TOKEN, provider, registry);
+tg.launch();
+```
+
+### Docker Deployment
+```bash
+docker-compose up --build
+```
 
 ## License
 MIT
-# agent-l

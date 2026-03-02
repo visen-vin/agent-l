@@ -1,8 +1,8 @@
 {
-  "name": "minimal-agent-sdk",
+  "name": "@visen-vin/agent-l",
   "version": "0.1.0",
   "type": "module",
-  "description": "A minimal, deterministic, single-agent loop SDK for Node.js.",
+  "description": "High-performance Agent SDK with Tree-Shaking memory, Parallel Tool Execution, and Shell access. An OpenClaw replacement.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -26,6 +26,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/visen-vin/agent-l.git"
+  },
+  "bugs": {
+    "url": "https://github.com/visen-vin/agent-l/issues"
+  },
+  "homepage": "https://github.com/visen-vin/agent-l#readme",
   "devDependencies": {
     "@types/node": "^25.3.3",
     "ts-node": "^10.9.2",
